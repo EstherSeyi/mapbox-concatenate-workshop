@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset='utf-8' />
+    <meta charset="utf-8" />
     <title>Concatenate Map</title>
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
 
     <!-- Add the `mapbox-gl-js` library to the page. This gives our JS code below access to the `mapboxgl` object -->
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js'></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
 
     <!-- Add some default styling for the map container & controls -->
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css' rel='stylesheet' />
+    <link
+      href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
     <style>
       body {
         margin: 0;
@@ -23,29 +29,57 @@
         width: 100%;
       }
     </style>
-
   </head>
   <body>
-
     <!-- Add a #map element to the page, to serve as the map's container -->
-    <div id='map'></div>
+    <div id="map"></div>
 
     <script>
+      // Set an access token to allow the browser to load the map from our account
+      // TODO replace this with YOUR access token!
+      mapboxgl.accessToken =
+        'pk.eyJ1IjoiZXN0aGVyc2V5aSIsImEiOiJjazFqMjhieW8wYnhmM2Ntbncyd2xocjZkIn0.NSkR45l33WVaKOlITcG09Q';
 
-    // Set an access token to allow the browser to load the map from our account
-    // TODO replace this with YOUR access token!
-    mapboxgl.accessToken = 'pk.eyJ1IjoidmFraWxhIiwiYSI6ImNrMWhuZnAwcjFjdWkzbm81M3pudXprcHIifQ.9As-ktwk5eelXbGP2z22HQ';
+      // Instantiate a new Map object to load the map itself
+      const map = new mapboxgl.Map({
+        style: 'mapbox://styles/estherseyi/ck1j7pk7r08f31cnnp679b7gu', //TODO replace this with YOUR style URL! This tells the map which style to use
+        container: 'map', // id of the container div we created above
+        center: [3.39663, 6.44392], // the location to display when the map first loads
+        zoom: 10 // the zoom level to display when the map first loads
+      });
 
-    // Instantiate a new Map object to load the map itself
-    const map = new mapboxgl.Map({
-      style: 'mapbox://styles/mapbox/streets-v11', //TODO replace this with YOUR style URL! This tells the map which style to use
-      container: 'map', // id of the container div we created above
-      center: [3.39663, 6.44392], // the location to display when the map first loads
-      zoom: 10 // the zoom level to display when the map first loads
-    });
+      // Part 4 code will go here
+      map.on('click', event => {
+        const clickedPoint = [event.lngLat.lng, event.lngLat.lat];
+        const location = {
+          center: clickedPoint,
+          zoom: map.getZoom(),
+          pitch: map.getPitch(),
+          bearing: map.getBearing()
+        };
+        map.flyTo(location);
+        const clicked = {
+          location: location
+        };
 
-    // Part 4 code will go here
+        const clickedFeatures = map.queryRenderedFeatures(event.point, {
+          layers: ['esther (1)']
+        });
 
+        if (clickedFeatures.length > 0) {
+          clicked.title = clickedFeatures[0].properties.title;
+          clicked.description = clickedFeatures[0].properties.description;
+
+          const popup = new mapboxgl.Popup() // create the popup
+            .setLngLat(clicked.location.center) // position it at the clicked point
+            .setHTML(
+              '<h3>' + clicked.title + '</h3><p>' + clicked.description + '</p>'
+            ) // add some HTML content
+            .addTo(map);
+        }
+
+        console.log(JSON.stringify(clicked, null, 2));
+      });
     </script>
   </body>
 </html>
